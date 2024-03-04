@@ -1,1 +1,0 @@
-This is a sample of image data created for Genshin Impact at 960x720 resolution (borderless). For other resolutions, you need to [create it yourself](https://www.autohotkey.com/docs/v2/lib/ImageSearch.htm#Remarks)
