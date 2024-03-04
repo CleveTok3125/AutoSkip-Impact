@@ -76,14 +76,14 @@ To learn how to generate image data, please visit `https://www.autohotkey.com/do
 default_i := 0
 ; =========================
 
-f8::
+home:: ; Press `home` to enable/disable the script
     Suspend -1
     return
     
-`::
+]:: ; Press `]` to start skip mode in the quest, (should hold down) `[` to stop
     i := default_i
     while 1 {
-        if GetKeyState("TAB") & 1 {
+        if GetKeyState("[") & 1 {
             break
         }
         try {
@@ -101,6 +101,8 @@ f8::
         }
     }
     return
+
+\::esc ; remap the esc key because most hotkeys are on the right
 
 backspace::
     ClickImage(".\data\cancel\")
