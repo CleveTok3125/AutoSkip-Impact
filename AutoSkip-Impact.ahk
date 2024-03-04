@@ -20,15 +20,38 @@ SearchImage(imageFile) {
     }
 }
 
+ClickImage(imageFile) {
+    i := 0
+    while 1 {
+        tempImageFile := imageFile . i . ".png"
+
+        SearchImage(tempImageFile)
+
+        if (FileExist(tempImageFile)) {
+            if (check) {
+                Click, %foundX%, %foundY%
+                Sleep 100
+                break
+            } else {
+                i += 1
+            }
+        } else {
+            Click
+            Sleep 100
+            break
+        }
+        Sleep 100
+    }
+}
+
 global foundX := 0
 global foundY := 0
 global FX
 global FY
 global default_i
-global check
+global check := 0
 global ScreenWidth
 global ScreenHeight
-check := 0
 
 ; =========================
 ; These are the search coordinates. With the default value, the search will start from 0x0 to ScreenWidthxScreenHeight (find the entire screen). These values can be adjusted for better performance.
@@ -53,6 +76,10 @@ To learn how to generate image data, please visit `https://www.autohotkey.com/do
 default_i := 0
 ; =========================
 
+f8::
+    Suspend -1
+    return
+    
 `::
     i := default_i
     while 1 {
@@ -61,7 +88,7 @@ default_i := 0
         }
         try {
             Sleep 1000
-            SearchImage(".\data\" . i . ".png")
+            SearchImage(".\data\chat\" . i . ".png")
             if (check) {
                 Sleep 3000
                 Click, %foundX%, %foundY%
@@ -73,19 +100,34 @@ default_i := 0
             Send {space}
         }
     }
+    return
+
+backspace::
+    ClickImage(".\data\cancel\")
+    return
+enter::
+    ClickImage(".\data\confirm\")
+    return
+
+; There may be some NPCs whose interactive dialogue options are out of order compared to the order in ahk. This depends on the image data you create. Below is just sample code.
+; Currently testing navigating between dialogue options using the arrow keys
 
 +1:: ; Shift + 1
-    SearchImage(".\data\0.png")
+    SearchImage(".\data\chat\0.png")
     Click, %foundX%, %foundY%
+    return
 
 +2:: ; Shift + 2
-    SearchImage(".\data\1.png")
+    SearchImage(".\data\chat\1.png")
     Click, %foundX%, %foundY%
+    return
 
 +3:: ; Shift + 3
-    SearchImage(".\data\2.png")
+    SearchImage(".\data\chat\2.png")
     Click, %foundX%, %foundY%
+    return
 
 +4:: ; Shift + 4
-    SearchImage(".\data\3.png")
+    SearchImage(".\data\chat\3.png")
     Click, %foundX%, %foundY%
+    return
