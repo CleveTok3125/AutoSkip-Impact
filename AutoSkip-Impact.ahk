@@ -10,7 +10,7 @@ SetBatchLines -1
 SearchImage(imageFile) {
     CoordMode, Screen
 
-    ImageSearch, foundX, foundY, FX, FY, ScreenWidth, ScreenHeight, *0 %imageFile%
+    ImageSearch, foundX, foundY, FX, FY, ScreenWidth, ScreenHeight, *32 %imageFile%
     
     if (ErrorLevel = 0) {
         check := 1
