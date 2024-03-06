@@ -10,7 +10,7 @@ SetBatchLines -1
 SearchImage(imageFile) {
     CoordMode, Screen
 
-    ImageSearch, foundX, foundY, FX, FY, ScreenWidth, ScreenHeight, *32 %imageFile%
+    ImageSearch, foundX, foundY, FX, FY, ScreenWidth, ScreenHeight, *0 %imageFile%
     
     if (ErrorLevel = 0) {
         check := 1
@@ -109,6 +109,19 @@ backspace::
     return
 enter::
     ClickImage(".\data\confirm\")
+    return
++enter:: ; Shift + Enter - "Click anywhere to close"
+    CoordMode, Mouse, Screen
+    WinGetPos X, Y, Width,,
+    X := X+Width-1
+    Y := Y+1
+    Click, %X%, %Y%, 1
+    return
+-::
+    ClickImage(".\data\neg\")
+    return
+=:: ; +
+    ClickImage(".\data\pos\")
     return
 
 ; There may be some NPCs whose interactive dialogue options are out of order compared to the order in ahk. This depends on the image data you create. Below is just sample code.
