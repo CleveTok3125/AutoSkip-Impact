@@ -20,14 +20,31 @@ SearchImage(imageFile) {
     }
 }
 
-ClickImage(imageFile) {
+Loose_SearchImage(imageFile) {
+    CoordMode, Screen
+
+    ImageSearch, foundX, foundY, FX, FY, ScreenWidth, ScreenHeight, *75 *Trans %imageFile% ; Because some details are shaded, often details related to special filters or transparency. Changing *n ( `*75` ) and finding the right value should help.
+    
+    if (ErrorLevel = 0) {
+        check := 1
+        return check, foundX, foundY
+    } else {
+        check := 0
+    }
+}
+
+ClickImage(imageFile, opts := "", isclick := 1) {
     i := 0
     while 1 {
         tempImageFile := imageFile . i . ".png"
 
-        SearchImage(tempImageFile)
-
         if (FileExist(tempImageFile)) {
+            if (opts = "L") {
+                Loose_SearchImage(tempImageFile)
+            } else {
+                SearchImage(tempImageFile)
+            }
+
             if (check) {
                 Click, %foundX%, %foundY%
                 Sleep 100
@@ -36,7 +53,9 @@ ClickImage(imageFile) {
                 i += 1
             }
         } else {
-            Click
+            if (isclick = 1) {
+                Click
+            }
             Sleep 100
             break
         }
@@ -54,11 +73,20 @@ global ScreenWidth
 global ScreenHeight
 
 ; =========================
-; These are the search coordinates. With the default value, the search will start from 0x0 to ScreenWidthxScreenHeight (find the entire screen). These values can be adjusted for better performance.
-SysGet, ScreenWidth, 78 ; Search to X
-SysGet, ScreenHeight, 79 ; Search to Y
-FX := 0 ; Search from X
-FY := 0 ; Search from Y
+/*
+These are the search coordinates. With the default value, the search will start from 0x0 to ScreenWidthxScreenHeight (find the entire screen). These values can be adjusted for better performance.
+EG: 1920x1080 screen
+
+    SysGet, ScreenWidth, 78 ; Search to 1920
+    SysGet, ScreenHeight, 79 ; Search to 1080
+    FX := 0 ; Search from 0
+    FY := 0 ; Search from 0
+
+Due to the inconsistency of CoordMode, for each hotkey that does not use coordinates returned from functions such as SearchImage, Loose_SearchImage, ClickImage it is necessary to add the line `CoordMode, Mouse, Screen` to ensure accuracy.
+*/
+WinGetPos, FX, FY, ScreenWidth, ScreenHeight, ahk_exe GenshinImpact.exe
+ScreenWidth := ScreenWidth + FX
+ScreenHeight := ScreenHeight + FY
 ; =========================
 
 ; =========================
@@ -112,20 +140,66 @@ enter::
     return
 +enter:: ; Shift + Enter - "Click anywhere to close"
     CoordMode, Mouse, Screen
-    WinGetPos X, Y, Width,,
-    X := X+Width-1
-    Y := Y+1
+    X := ScreenWidth - 1
+    Y := FY + 1
     Click, %X%, %Y%, 1
     return
 -::
     ClickImage(".\data\neg\")
     return
++-:: ; Shift + - ; In the drag and drop bar to select the quantity
+    ClickImage(".\data\drag\", "L", 0)
+    if (check) {
+        Click, %foundX%, %foundY%, Left, , Down
+        Sleep 50
+        Loop 2 {
+            MouseMove, -round(ScreenWidth/2), 0, , R
+            Sleep 2
+        }
+        Click, , , Left, , Up
+        MouseMove, foundX, foundY
+    }
+    return
 =:: ; +
     ClickImage(".\data\pos\")
+    return
++=:: ; Shift + = ; In the drag and drop bar to select the quantity
+    ClickImage(".\data\drag\", "L", 0)
+    if (check) {
+        Click, %foundX%, %foundY%, Left, , Down
+        Sleep 50
+        Loop 2 {
+            MouseMove, round(ScreenWidth/2), 0, , R
+            Sleep 2
+        }
+        Click, , , Left, , Up
+        MouseMove, foundX, foundY
+    }
     return
 
 ; There may be some NPCs whose interactive dialogue options are out of order compared to the order in ahk. This depends on the image data you create. Below is just sample code.
 ; Currently testing navigating between dialogue options using the arrow keys
+
++`:: ; Shift + ` - Click on any visible dialogue option
+    i := default_i
+    while 1 {
+        tempImageFile := ".\data\chat\" . i . ".png"
+        if (FileExist(tempImageFile)) {
+            SearchImage(tempImageFile)
+            if (check) {
+                Click, %foundX%, %foundY%
+                Sleep 100
+                break
+            } else {
+                i += 1
+            }
+        } else {
+            Sleep 100
+            break
+        }
+        Sleep 100
+    }
+    return
 
 +1:: ; Shift + 1
     SearchImage(".\data\chat\0.png")
