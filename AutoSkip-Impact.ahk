@@ -20,10 +20,10 @@ SearchImage(imageFile) {
     }
 }
 
-Loose_SearchImage(imageFile) {
+Loose_SearchImage(imageFile, opts := 75) {
     CoordMode, Screen
 
-    ImageSearch, foundX, foundY, FX, FY, ScreenWidth, ScreenHeight, *75 *Trans %imageFile% ; Because some details are shaded, often details related to special filters or transparency. Changing *n ( `*75` ) and finding the right value should help.
+    ImageSearch, foundX, foundY, FX, FY, ScreenWidth, ScreenHeight, *%opts% *Trans %imageFile% ; Because some details are shaded, often details related to special filters or transparency. Changing *n ( `*75` ) and finding the right value should help.
     
     if (ErrorLevel = 0) {
         check := 1
@@ -33,19 +33,20 @@ Loose_SearchImage(imageFile) {
     }
 }
 
-ClickImage(imageFile, opts := "", isclick := 1) {
+ClickImage(imageFile, opts := "", isclick := "1", bitdeep := 75) {
     i := 0
     while 1 {
         tempImageFile := imageFile . i . ".png"
 
         if (FileExist(tempImageFile)) {
             if (opts = "L") {
-                Loose_SearchImage(tempImageFile)
+                Loose_SearchImage(tempImageFile, bitdeep)
             } else {
                 SearchImage(tempImageFile)
             }
 
             if (check) {
+                ;MsgBox % tempImageFile
                 Click, %foundX%, %foundY%
                 Sleep 100
                 break
@@ -53,7 +54,7 @@ ClickImage(imageFile, opts := "", isclick := 1) {
                 i += 1
             }
         } else {
-            if (isclick = 1) {
+            if (isclick = "1") {
                 Click
             }
             Sleep 100
@@ -65,12 +66,11 @@ ClickImage(imageFile, opts := "", isclick := 1) {
 
 global foundX := 0
 global foundY := 0
-global FX
-global FY
+global FX, FY
 global default_i
 global check := 0
-global ScreenWidth
-global ScreenHeight
+global ScreenWidth, ScreenHeight
+global MouseSpeed, orgMouseSpeed, adjustMouseSpeed
 
 ; =========================
 /*
@@ -104,10 +104,20 @@ To learn how to generate image data, please visit `https://www.autohotkey.com/do
 default_i := 0
 ; =========================
 
+; =========================
+; MouseSpeed simply means the speed of the mouse cursor when controlled with the arrow keys (almost like Mouse Keys). The higher the value, the lower the accuracy.
+; The hotkeys in the mV section will use these values.
+MouseSpeed := 10
+orgMouseSpeed := MouseSpeed
+adjustMouseSpeed := 5
+; =========================
+
+; mI
 home:: ; Press `home` to enable/disable the script
     Suspend -1
     return
-    
+
+; mII
 ]:: ; Press `]` to start skip mode in the quest, (should hold down) `[` to stop
     i := default_i
     while 1 {
@@ -130,8 +140,7 @@ home:: ; Press `home` to enable/disable the script
     }
     return
 
-\::esc ; remap the esc key because most hotkeys are on the right
-
+; mIII
 backspace::
     ClickImage(".\data\cancel\")
     return
@@ -177,8 +186,55 @@ enter::
     }
     return
 
+; mIV
+PgUP::
+    Send {WheelUp}
+    return
+PgDn::
+    Send {WheelDown}
+    return
+\::esc ; remap the esc key because most hotkeys are on the right
+`::
+    Send {MButton}
+    return
+
+; mV
+RCtrl:: ; Click to switch to drag and drop mode
+    if GetKeyState("LButton", "P") {
+        Click, , , Left, Up
+    } else {    
+        Click, , , Left, Down    
+    }
+    return
+End:: ; Left click at the cursor position
+    Click, , , Left, Down
+    Sleep 50
+    Click, , , Left, Up
+    return
++Down::
+    MouseSpeed := orgMouseSpeed
+    return
++Right::
+    MouseSpeed := MouseSpeed + adjustMouseSpeed
+    return
++Left::
+    MouseSpeed := MouseSpeed - adjustMouseSpeed
+    return
+Up::
+    MouseMove, 0, -%MouseSpeed%, , R
+    return
+Down::
+    MouseMove, 0, %MouseSpeed%, , R
+    return
+Left::
+    MouseMove, -%MouseSpeed%, 0, , R
+    return
+Right::
+    MouseMove, %MouseSpeed%, 0, , R
+    return
+
+; mVI
 ; There may be some NPCs whose interactive dialogue options are out of order compared to the order in ahk. This depends on the image data you create. Below is just sample code.
-; Currently testing navigating between dialogue options using the arrow keys
 
 +`:: ; Shift + ` - Click on any visible dialogue option
     i := default_i
