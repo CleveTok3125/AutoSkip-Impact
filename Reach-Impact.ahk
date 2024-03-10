@@ -18,6 +18,7 @@ SearchImage(imageFile) {
     } else {
         check := 0
     }
+    return
 }
 
 Loose_SearchImage(imageFile, opts := 75) {
@@ -31,6 +32,7 @@ Loose_SearchImage(imageFile, opts := 75) {
     } else {
         check := 0
     }
+    return
 }
 
 ClickImage(imageFile, opts := "", isclick := "1", bitdeep := 75) {
@@ -62,6 +64,21 @@ ClickImage(imageFile, opts := "", isclick := "1", bitdeep := 75) {
         }
         Sleep 100
     }
+    return
+}
+
+Led() {
+    if !GetKeyState("CapsLock", "T") {
+        SetCapsLockState 1
+    } else {
+        SetCapsLockState 0
+    }
+    if !GetKeyState("NumLock", "T") {
+        SetNumLockState 1
+    } else {
+        SetNumLockState 0
+    }
+    Sleep 200
 }
 
 global foundX := 0
@@ -107,7 +124,7 @@ default_i := 0
 ; =========================
 ; MouseSpeed simply means the speed of the mouse cursor when controlled with the arrow keys (almost like Mouse Keys). The higher the value, the lower the accuracy.
 ; The hotkeys in the mV section will use these values.
-MouseSpeed := 10
+MouseSpeed := round((ScreenWidth+ScreenHeight)/100)
 orgMouseSpeed := MouseSpeed
 adjustMouseSpeed := 5
 ; =========================
@@ -115,6 +132,15 @@ adjustMouseSpeed := 5
 ; mI
 home:: ; Press `home` to enable/disable the script
     Suspend -1
+    if A_IsSuspended {
+        Loop 4 {
+            Led()
+        }
+    } else {
+        Loop 2 {
+            Led()
+        }
+    }
     return
 
 ; mII
@@ -197,19 +223,37 @@ PgDn::
 `::
     Send {MButton}
     return
+n::
+    Loop {
+        Send {w down}
+        if GetKeyState("TAB") & 1 {
+            break
+        }
+        Sleep 50
+    }
+    Send {w up}
+    Return
 
 ; mV
-RCtrl:: ; Click to switch to drag and drop mode
++RCtrl:: ; Shift + RCtrl to switch to drag and drop mode, Double Press to Click (not recommend)
     if GetKeyState("LButton", "P") {
         Click, , , Left, Up
     } else {    
         Click, , , Left, Down    
     }
     return
-End:: ; Left click at the cursor position
+!RCtrl::
+    Click, , , Right, Down
+    Sleep 50
+    Click, , , Right, Up
+    return
+RCtrl::
     Click, , , Left, Down
     Sleep 50
     Click, , , Left, Up
+    return
++Up:: ; Move cursor to center of screen
+    MouseMove, (ScreenWidth-FX)/2-1, (ScreenHeight-FY)/2-1
     return
 +Down::
     MouseSpeed := orgMouseSpeed
