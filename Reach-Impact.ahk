@@ -37,6 +37,7 @@ Loose_SearchImage(imageFile, opts := 75) {
 
 ClickImage(imageFile, opts := "", isclick := "1", bitdeep := 75) {
     i := 0
+    MouseGetPos, OutputVarX, OutputVarY
     while 1 {
         tempImageFile := imageFile . i . ".png"
 
@@ -51,6 +52,7 @@ ClickImage(imageFile, opts := "", isclick := "1", bitdeep := 75) {
                 ;MsgBox % tempImageFile
                 Click, %foundX%, %foundY%
                 Sleep 100
+                MouseMove, OutputVarX, OutputVarY
                 break
             } else {
                 i += 1
@@ -124,9 +126,9 @@ default_i := 0
 ; =========================
 ; MouseSpeed simply means the speed of the mouse cursor when controlled with the arrow keys (almost like Mouse Keys). The higher the value, the lower the accuracy.
 ; The hotkeys in the mV section will use these values.
-MouseSpeed := round((ScreenWidth+ScreenHeight)/100)
+MouseSpeed := round((ScreenWidth+ScreenHeight-FX-FY)/100)
 orgMouseSpeed := MouseSpeed
-adjustMouseSpeed := 5
+adjustMouseSpeed := round(MouseSpeed/2)
 ; =========================
 
 ; mI
