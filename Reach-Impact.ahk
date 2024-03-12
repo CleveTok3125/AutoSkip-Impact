@@ -126,13 +126,13 @@ default_i := 0
 ; =========================
 ; MouseSpeed simply means the speed of the mouse cursor when controlled with the arrow keys (almost like Mouse Keys). The higher the value, the lower the accuracy.
 ; The hotkeys in the mV section will use these values.
-MouseSpeed := round((ScreenWidth+ScreenHeight-FX-FY)/100)
+MouseSpeed := (ScreenWidth+ScreenHeight-FX-FY)//100
 orgMouseSpeed := MouseSpeed
-adjustMouseSpeed := round(MouseSpeed/2)
+adjustMouseSpeed := MouseSpeed//2
 ; =========================
 
 ; mI
-home:: ; Press `home` to enable/disable the script
+~home:: ; Press `home` to enable/disable the script
     Suspend -1
     if A_IsSuspended {
         Loop 4 {
@@ -146,7 +146,7 @@ home:: ; Press `home` to enable/disable the script
     return
 
 ; mII
-]:: ; Press `]` to start skip mode in the quest, (should hold down) `[` to stop
+~]:: ; Press `]` to start skip mode in the quest, (should hold down) `[` to stop
     i := default_i
     while 1 {
         if GetKeyState("[") & 1 {
@@ -169,44 +169,44 @@ home:: ; Press `home` to enable/disable the script
     return
 
 ; mIII
-backspace::
+~backspace::
     ClickImage(".\data\cancel\")
     return
-enter::
+~enter::
     ClickImage(".\data\confirm\")
     return
-+enter:: ; Shift + Enter - "Click anywhere to close"
+~+enter:: ; Shift + Enter - "Click anywhere to close"
     CoordMode, Mouse, Screen
     X := ScreenWidth - 1
     Y := FY + 1
     Click, %X%, %Y%, 1
     return
--::
+~-::
     ClickImage(".\data\neg\")
     return
-+-:: ; Shift + - ; In the drag and drop bar to select the quantity
+~+-:: ; Shift + - ; In the drag and drop bar to select the quantity
     ClickImage(".\data\drag\", "L", 0)
     if (check) {
         Click, %foundX%, %foundY%, Left, , Down
         Sleep 50
         Loop 2 {
-            MouseMove, -round(ScreenWidth/2), 0, , R
+            MouseMove, -ScreenWidth/2, 0, , R
             Sleep 2
         }
         Click, , , Left, , Up
         MouseMove, foundX, foundY
     }
     return
-=:: ; +
+~=:: ; +
     ClickImage(".\data\pos\")
     return
-+=:: ; Shift + = ; In the drag and drop bar to select the quantity
+~+=:: ; Shift + = ; In the drag and drop bar to select the quantity
     ClickImage(".\data\drag\", "L", 0)
     if (check) {
         Click, %foundX%, %foundY%, Left, , Down
         Sleep 50
         Loop 2 {
-            MouseMove, round(ScreenWidth/2), 0, , R
+            MouseMove, ScreenWidth/2, 0, , R
             Sleep 2
         }
         Click, , , Left, , Up
@@ -215,17 +215,23 @@ enter::
     return
 
 ; mIV
-PgUP::
+~PgUP::
     Send {WheelUp}
     return
-PgDn::
+~PgDn::
     Send {WheelDown}
     return
-\::esc ; remap the esc key because most hotkeys are on the right
-`::
+~\::esc ; remap the esc key because most hotkeys are on the right
+    return
+~RAlt::LAlt
+    return
+~End::
     Send {MButton}
     return
-n::
+~`::
+    Send {MButton}
+    return
+~n::
     Loop {
         Send {w down}
         if GetKeyState("TAB") & 1 {
@@ -237,52 +243,80 @@ n::
     Return
 
 ; mV
-+RCtrl:: ; Shift + RCtrl to switch to drag and drop mode, Double Press to Click (not recommend)
+~+RCtrl:: ; Shift + RCtrl to switch to drag and drop mode, Double Press to Click (not recommend)
     if GetKeyState("LButton", "P") {
         Click, , , Left, Up
     } else {    
         Click, , , Left, Down    
     }
     return
-!RCtrl::
+~!RCtrl::RButton
+/*
     Click, , , Right, Down
     Sleep 50
     Click, , , Right, Up
+*/
     return
-RCtrl::
+~RCtrl::LButton
+/*
     Click, , , Left, Down
     Sleep 50
     Click, , , Left, Up
+*/
     return
-+Up:: ; Move cursor to center of screen
+~+Up:: ; Move cursor to center of screen
     MouseMove, (ScreenWidth-FX)/2-1, (ScreenHeight-FY)/2-1
     return
-+Down::
+~+Down::
     MouseSpeed := orgMouseSpeed
     return
-+Right::
+~+Right::
     MouseSpeed := MouseSpeed + adjustMouseSpeed
     return
-+Left::
+~+Left::
     MouseSpeed := MouseSpeed - adjustMouseSpeed
     return
-Up::
+~Right & Up::
+    MouseMove, %MouseSpeed%, -%MouseSpeed%, , R
+    return
+~Up & Right::
+    MouseMove, %MouseSpeed%, -%MouseSpeed%, , R
+    return
+~Left & Up::
+    MouseMove, -%MouseSpeed%, -%MouseSpeed%, , R
+    return
+~Up & Left::
+    MouseMove, -%MouseSpeed%, -%MouseSpeed%, , R
+    return
+~Down & Right::
+    MouseMove, %MouseSpeed%, %MouseSpeed%, , R
+    return
+~Right & Down::
+    MouseMove, %MouseSpeed%, %MouseSpeed%, , R
+    return
+~Left & Down::
+    MouseMove, -%MouseSpeed%, %MouseSpeed%, , R
+    return
+~Down & Left::
+    MouseMove, -%MouseSpeed%, %MouseSpeed%, , R
+    return
+~*Up::
     MouseMove, 0, -%MouseSpeed%, , R
     return
-Down::
+~*Down::
     MouseMove, 0, %MouseSpeed%, , R
     return
-Left::
+~*Left::
     MouseMove, -%MouseSpeed%, 0, , R
     return
-Right::
+~*Right::
     MouseMove, %MouseSpeed%, 0, , R
     return
 
 ; mVI
 ; There may be some NPCs whose interactive dialogue options are out of order compared to the order in ahk. This depends on the image data you create. Below is just sample code.
 
-+`:: ; Shift + ` - Click on any visible dialogue option
+~+`:: ; Shift + ` - Click on any visible dialogue option
     i := default_i
     while 1 {
         tempImageFile := ".\data\chat\" . i . ".png"
