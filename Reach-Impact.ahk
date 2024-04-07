@@ -4,7 +4,6 @@
 SendMode Input
 #WinActivateForce
 SetBatchLines -1
-#IfWinActive ahk_exe GenshinImpact.exe
 #MaxThreadsPerHotkey 1
 
 SearchImage(imageFile) {
@@ -91,6 +90,8 @@ global check := 0
 global ScreenWidth, ScreenHeight
 global MouseSpeed, orgMouseSpeed, adjustMouseSpeed
 
+#IfWinActive ahk_exe GenshinImpact.exe
+
 ; =========================
 /*
 These are the search coordinates. With the default value, the search will start from 0x0 to ScreenWidthxScreenHeight (find the entire screen). These values can be adjusted for better performance.
@@ -145,6 +146,13 @@ adjustMouseSpeed := MouseSpeed//2
     }
     return
 
+~+home:: ; Reload scripts
+    Loop 6 {
+        Led()
+    }
+    Reload
+    return
+    
 ; mII
 ~]:: ; Press `]` to start skip mode in the quest, (should hold down) `[` to stop
     i := default_i
@@ -221,6 +229,12 @@ adjustMouseSpeed := MouseSpeed//2
 ~PgDn::
     Send {WheelDown}
     return
+~H & T::
+    Send {WheelUp}
+    return
+~H & G::
+    Send {WheelDown}
+    return
 ~\::esc ; remap the esc key because most hotkeys are on the right
     return
 ~RAlt::LAlt
@@ -240,6 +254,21 @@ adjustMouseSpeed := MouseSpeed//2
         Sleep 50
     }
     Send {w up}
+    Return
+~H & F::
+    while GetKeyState("f", "P") & 1 {
+        if GetKeyState("TAB") & 1 {
+            break
+        }
+        Random, rand, 20, 30
+        Sleep %rand%
+        Send {f 3}
+        Random, rand, 20, 30
+        Sleep %rand%
+        Send {WheelDown 1}
+        Random, rand, 20, 30
+        Sleep %rand%
+    }
     Return
 
 ; mV
